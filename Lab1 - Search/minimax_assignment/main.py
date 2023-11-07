@@ -19,7 +19,7 @@ class Settings:
         # Window size is immutable and equal to self.window_scale * (800, 600)
         self.window_scale = 1.0
         # Time threshold
-        self.time_threshold = 75*1e-3
+        self.time_threshold = 75*1e-1
         # Space subdivisions
         self.space_subdivisions = 20
         # Number of frames before an action is executed
@@ -129,12 +129,16 @@ class Application(SettingLoader):
 
 
 if __name__ == '__main__':
+    #THIS HAS BEEN COMMENTED OUT
     # Arguments parsing
-    arguments_parser = argparse.ArgumentParser(
-        description="Run the fishing derby KTH app")
-    arguments_parser.add_argument("config_file", type=str,
-                                  help="Configuration file")
-    args = arguments_parser.parse_args()
+    #arguments_parser = argparse.ArgumentParser(
+    #    description="Run the fishing derby KTH app")
+    #arguments_parser.add_argument("config_file", type=str,
+    #                              help="Configuration file")
+    
+    #args = arguments_parser.parse_args()
+    args = argparse.Namespace(config_file='settings.yml')
+    
 
     # Load the settings from the yaml file
     settings = Settings()
