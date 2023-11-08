@@ -81,7 +81,7 @@ class PlayerControllerMinimax(PlayerController):
         return ACTION_TO_STR[best_move]
 
     
-    def minmax(self, node, i = 0):
+    def minmax(self, node):
         children = node.compute_and_get_children()
         
         if children == [] or node.depth == 4:
@@ -92,7 +92,7 @@ class PlayerControllerMinimax(PlayerController):
         if node.state.get_player() == 0:
             bestPossible = float('-inf')
             for child in children:
-                v = self.minmax(child, i+1)
+                v = self.minmax(child)
 
                 if v > bestPossible:
                     bestPossible = v
@@ -100,7 +100,7 @@ class PlayerControllerMinimax(PlayerController):
         else:
             bestPossible = float('inf')
             for child in children:
-                v = self.minmax(child, i+1)
+                v = self.minmax(child)
 
                 if v < bestPossible:
                     bestPossible = v
