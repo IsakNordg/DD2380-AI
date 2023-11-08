@@ -84,7 +84,7 @@ class PlayerControllerMinimax(PlayerController):
     def minmax(self, node):
         children = node.compute_and_get_children()
         
-        if children == [] or node.depth == 4:
+        if children == [] or node.depth == 4: 
             scores = node.state.get_player_scores()
             return self.heuristic(node)
             # Theory: This value could be (1, 0 or -1), since this is a zero-sum game
@@ -105,6 +105,34 @@ class PlayerControllerMinimax(PlayerController):
                 if v < bestPossible:
                     bestPossible = v
             return bestPossible
+        
+    def alphabeta(self, node, depth, alpha, beta):
+        children = node.compute_and_get_children()
+        
+        if children == [] or node.depth == 0: #or node.depth==0 in pseudo code
+            scores = node.state.get_player_scores()
+            return self.heuristic(node)
+            # Theory: This value could be (1, 0 or -1), since this is a zero-sum game
+
+        if node.state.get_player() == 0:
+            v = float('-inf')
+            for child in children:
+                ab = self.alphabeta(child, depth-1, alpha, beta)
+                v = max( v, ab)
+                α = max(alpha, v)
+                if alpha >= beta:
+                    break #β prune - tror kanske denna behöver fixas, minns inte hur break funkar i python
+                 
+        else:
+            v = float('inf')
+            for child in children:
+                ab = self.alphabeta(child, depth-1, alpha, beta)
+                v = min(v, ab)
+                beta = min(beta, v)
+                if alpha >= beta:
+                    break #α prune - tror kanske denna behöver fixas, minns inte hur break funkar i python
+
+        return v
 
     def heuristic(self, node):
         """
@@ -125,8 +153,12 @@ class PlayerControllerMinimax(PlayerController):
             h = max(h, node.state.fish_scores[i] * math.exp(-distance))
 
         return 2 * total_score + h
+        #Ideas to test
+        """
+        remove 2* ?
+        add more fishes than just one?"""
 
-    def l1_distance(self, fish_positions, hook_positions):
+    def l1_distance(self, fish_positions, hook_positions): #Byt denna mot euclidian distance? Fast manhattan borde ju stämma bäst efetrsom vi inte kan gå raka vägen
         """
         Computes the Manhattan distance between the player hook and a given fish
         :param hook_positions: Position of the player's hook
