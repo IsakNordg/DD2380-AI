@@ -66,12 +66,16 @@ class PlayerControllerMinimax(PlayerController):
         # NOTE: Don't forget to initialize the children of the current node
         #       with its compute_and_get_children() method!
 
+        # HYPERPARAMETER
+        depth = 7
+        #########
+
         children = initial_tree_node.compute_and_get_children()
         best_move = None
         best_score = float('-inf')
 
         for child in children:
-            score = self.minmax(child)
+            score = self.alphabeta(child, depth, float('-inf'), float('inf'))
             if score > best_score:
                 print("updated best score to: ", score)
                 best_score = score
@@ -109,24 +113,23 @@ class PlayerControllerMinimax(PlayerController):
     def alphabeta(self, node, depth, alpha, beta):
         children = node.compute_and_get_children()
         
-        if children == [] or node.depth == 0: #or node.depth==0 in pseudo code
-            scores = node.state.get_player_scores()
+        if children == [] or node.depth == depth: #or node.depth==0 in pseudo code
             return self.heuristic(node)
             # Theory: This value could be (1, 0 or -1), since this is a zero-sum game
 
         if node.state.get_player() == 0:
             v = float('-inf')
             for child in children:
-                ab = self.alphabeta(child, depth-1, alpha, beta)
+                ab = self.alphabeta(child, depth, alpha, beta)
                 v = max( v, ab)
-                α = max(alpha, v)
+                alpha = max(alpha, v)
                 if alpha >= beta:
                     break #β prune - tror kanske denna behöver fixas, minns inte hur break funkar i python
                  
         else:
             v = float('inf')
             for child in children:
-                ab = self.alphabeta(child, depth-1, alpha, beta)
+                ab = self.alphabeta(child, depth, alpha, beta)
                 v = min(v, ab)
                 beta = min(beta, v)
                 if alpha >= beta:
