@@ -66,22 +66,32 @@ class PlayerControllerMinimax(PlayerController):
         # NOTE: Don't forget to initialize the children of the current node
         #       with its compute_and_get_children() method!
 
-        # HYPERPARAMETER
-        depth = 7
-        #########
+        # #############################
+        # HYPERPARAMETERS        
+        self.depth = 7
+        # #############################
 
         children = initial_tree_node.compute_and_get_children()
         best_move = None
         best_score = float('-inf')
 
+        childHeuristics = []
         for child in children:
-            score = self.alphabeta(child, depth, float('-inf'), float('inf'))
+            # See which moves gives the best heuristic
+            score = self.heuristic(child)
+            childHeuristics.append(score)
+
+        order = []
+        for child in children:
+            order.append(childHeuristics.index(max(childHeuristics)))
+            
+
+        for childIndex in order:
+            child = children[childIndex]
+            score = self.alphabeta(child, float('-inf'), float('inf'))
             if score > best_score:
-                print("updated best score to: ", score)
                 best_score = score
                 best_move = child.move
-            #print(child.move, score)
-        print(best_move)
         return ACTION_TO_STR[best_move]
 
     
@@ -110,79 +120,68 @@ class PlayerControllerMinimax(PlayerController):
                     bestPossible = v
             return bestPossible
         
-    def alphabeta(self, node, depth, alpha, beta):
+    def alphabeta(self, node, alpha, beta):
         children = node.compute_and_get_children()
         
-        if children == [] or node.depth == depth: #or node.depth==0 in pseudo code
+        if children == [] or node.depth == self.depth: 
             return self.heuristic(node)
-            # Theory: This value could be (1, 0 or -1), since this is a zero-sum game
+        
+        childHeuristics = []
+        for child in children:
+            # See which moves gives the best heuristic
+            score = self.heuristic(child)
+            childHeuristics.append(score)
+
+        order = []
+        for child in children:
+            order.append(childHeuristics.index(max(childHeuristics)))
+
 
         if node.state.get_player() == 0:
             v = float('-inf')
-            for child in children:
-                ab = self.alphabeta(child, depth, alpha, beta)
+            for childIndex in order:
+                child = children[childIndex]
+                ab = self.alphabeta(child, alpha, beta)
                 v = max( v, ab)
                 alpha = max(alpha, v)
                 if alpha >= beta:
-                    break #β prune - tror kanske denna behöver fixas, minns inte hur break funkar i python
+                    break
                  
         else:
             v = float('inf')
-            for child in children:
-                ab = self.alphabeta(child, depth, alpha, beta)
+            for childIndex in order:
+                child = children[childIndex]
+                ab = self.alphabeta(child, alpha, beta)
                 v = min(v, ab)
                 beta = min(beta, v)
                 if alpha >= beta:
-                    break #α prune - tror kanske denna behöver fixas, minns inte hur break funkar i python
+                    break
 
         return v
 
     def heuristic(self, node):
-        """
-        Computes a heuristic for a particular node.
-        :param node: Given node
-        :type node: game_tree.Node
-        :return: Heuristic score
-        :rtype: float
-        """
+        score = node.state.player_scores[0] - node.state.player_scores[1]
 
-        total_score = node.state.player_scores[0] - node.state.player_scores[1]
+        fish_pos = node.state.fish_positions
+        hook_pos = node.state.hook_positions[0]
+        fish_scores = node.state.fish_scores
 
-        h = 0
-        for i in node.state.fish_positions:
-            distance = self.l1_distance(node.state.fish_positions[i], node.state.hook_positions[0])
-            if distance == 0 and node.state.fish_scores[i] > 0:
-                return float('inf')
-            h = max(h, node.state.fish_scores[i] * math.exp(-distance))
+        heuristic_score = 0
+        for i in fish_pos:
+            # Manhattan distance
+            delta_x = abs(fish_pos[i][0] - hook_pos[0])
+            delta_x = min(delta_x, 20 - delta_x)
+            delta_y = abs(fish_pos[i][1] - hook_pos[1])
+            dist = delta_x + delta_y
 
-        return 2 * total_score + h
-        #Ideas to test
-        """
-        remove 2* ?
-        add more fishes than just one?"""
+            if dist == 0 and fish_scores[i] > 0:
+                return float('inf') # If we can catch a fish, we should do it
+            heuristic_score = max(heuristic_score, fish_scores[i] / dist) # * math.exp(-dist))
 
-    def l1_distance(self, fish_positions, hook_positions): #Byt denna mot euclidian distance? Fast manhattan borde ju stämma bäst efetrsom vi inte kan gå raka vägen
-        """
-        Computes the Manhattan distance between the player hook and a given fish
-        :param hook_positions: Position of the player's hook
-        :type hook_positions: array
-        :param fish_positions: Position of a given fish
-        :type fish_positions: array
-        :return: Manhattan distance
-        :rtype: int
-        """
+        return score + heuristic_score
 
-        y = abs(fish_positions[1] - hook_positions[1])
-
-        delta_x = abs(fish_positions[0] - hook_positions[0])
-        x = min(delta_x, 20 - delta_x)
-
-        return x + y
-    
-
-
-# TODO imorgon:
+# TODO
 """
-    Egen heuristic
-    Alpha-beta pruning
+    Iterative deepening
+    Move ordering i alla steg?
 """
