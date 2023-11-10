@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import random, math
+import random, math, time
 
 from fishing_game_core.game_tree import Node
 from fishing_game_core.player_utils import PlayerController
@@ -68,9 +68,10 @@ class PlayerControllerMinimax(PlayerController):
 
         # #############################
         # HYPERPARAMETERS        
-        self.depth = 7
+        self.depth = 1
         # #############################
 
+        self.start = time.time()
         children = initial_tree_node.compute_and_get_children()
         best_move = None
         best_score = float('-inf')
@@ -85,44 +86,27 @@ class PlayerControllerMinimax(PlayerController):
         for child in children:
             order.append(childHeuristics.index(max(childHeuristics)))
             
+        while True:
+            try:
+                for childIndex in order:
+                    child = children[childIndex]
+                    score = self.alphabeta(child, float('-inf'), float('inf'))
+                    if score > best_score:
+                        best_score = score
+                        best_move = child.move
+                self.depth += 1
+            except Exception as e:
+                break
 
-        for childIndex in order:
-            child = children[childIndex]
-            score = self.alphabeta(child, float('-inf'), float('inf'))
-            if score > best_score:
-                best_score = score
-                best_move = child.move
         return ACTION_TO_STR[best_move]
 
-    
-    def minmax(self, node):
-        children = node.compute_and_get_children()
-        
-        if children == [] or node.depth == 4: 
-            scores = node.state.get_player_scores()
-            return self.heuristic(node)
-            # Theory: This value could be (1, 0 or -1), since this is a zero-sum game
-
-        if node.state.get_player() == 0:
-            bestPossible = float('-inf')
-            for child in children:
-                v = self.minmax(child)
-
-                if v > bestPossible:
-                    bestPossible = v
-            return bestPossible
-        else:
-            bestPossible = float('inf')
-            for child in children:
-                v = self.minmax(child)
-
-                if v < bestPossible:
-                    bestPossible = v
-            return bestPossible
         
     def alphabeta(self, node, alpha, beta):
         children = node.compute_and_get_children()
         
+        if time.time() - self.start > 0.055:
+            raise Exception("Timeout")
+
         if children == [] or node.depth == self.depth: 
             return self.heuristic(node)
         
