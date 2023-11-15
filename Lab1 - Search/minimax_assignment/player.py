@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import random, math
+import random, math, time
 
 from fishing_game_core.game_tree import Node
 from fishing_game_core.player_utils import PlayerController
@@ -68,11 +68,13 @@ class PlayerControllerMinimax(PlayerController):
 
         # #############################
         # HYPERPARAMETERS        
-        self.depth = 7
+        self.depth = 2
         # #############################
 
+        self.start = time.time()
+
         children = initial_tree_node.compute_and_get_children()
-        best_move = None
+        best_move = 0
         best_score = float('-inf')
 
         childHeuristics = []
@@ -92,38 +94,14 @@ class PlayerControllerMinimax(PlayerController):
             if score > best_score:
                 best_score = score
                 best_move = child.move
+
         return ACTION_TO_STR[best_move]
 
-    
-    def minmax(self, node):
-        children = node.compute_and_get_children()
-        
-        if children == [] or node.depth == 4: 
-            scores = node.state.get_player_scores()
-            return self.heuristic(node)
-            # Theory: This value could be (1, 0 or -1), since this is a zero-sum game
-
-        if node.state.get_player() == 0:
-            bestPossible = float('-inf')
-            for child in children:
-                v = self.minmax(child)
-
-                if v > bestPossible:
-                    bestPossible = v
-            return bestPossible
-        else:
-            bestPossible = float('inf')
-            for child in children:
-                v = self.minmax(child)
-
-                if v < bestPossible:
-                    bestPossible = v
-            return bestPossible
         
     def alphabeta(self, node, alpha, beta):
         children = node.compute_and_get_children()
         
-        if children == [] or node.depth == self.depth: 
+        if children == [] or node.depth == self.depth:
             return self.heuristic(node)
         
         childHeuristics = []
@@ -142,7 +120,7 @@ class PlayerControllerMinimax(PlayerController):
             for childIndex in order:
                 child = children[childIndex]
                 ab = self.alphabeta(child, alpha, beta)
-                v = max( v, ab)
+                v = max(v, ab)
                 alpha = max(alpha, v)
                 if alpha >= beta:
                     break
@@ -176,7 +154,7 @@ class PlayerControllerMinimax(PlayerController):
 
             if dist == 0 and fish_scores[i] > 0:
                 return float('inf') # If we can catch a fish, we should do it
-            heuristic_score = max(heuristic_score, fish_scores[i] / dist) # * math.exp(-dist))
+            heuristic_score = max(heuristic_score, fish_scores[i] / dist) 
 
         return score + heuristic_score
 
