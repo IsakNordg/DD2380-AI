@@ -68,34 +68,62 @@ class PlayerControllerMinimax(PlayerController):
 
         # #############################
         # HYPERPARAMETERS        
-        self.depth = 2
+        self.depth = 4
         # #############################
+
+        self.start = time.time()
 
         children = initial_tree_node.compute_and_get_children()
         best_move = 0
-        best_score = float('-inf')            
+        best_score = float('-inf')
 
-        for child in children:
-            try:
+        try:
+            childHeuristics = []
+            for child in children:
+                # See which moves gives the best heuristic
+                score = self.heuristic(child)
+                childHeuristics.append(score)
+
+            order = []
+            for child in children:
+                order.append(childHeuristics.index(max(childHeuristics)))
+
+            for childIndex in order:
+                child = children[childIndex]
                 score = self.alphabeta(child, float('-inf'), float('inf'))        
                 if score > best_score:
                     best_score = score
                     best_move = child.move
-            except:
-                pass
+        except:
+            pass
 
         return ACTION_TO_STR[best_move]
 
         
     def alphabeta(self, node, alpha, beta):
+
+        if time.time() - self.start > 0.05:
+            raise TimeoutError
+
         children = node.compute_and_get_children()
         
         if children == [] or node.depth == self.depth:
             return self.heuristic(node)
+        
+        childHeuristics = []
+        for child in children:
+            # See which moves gives the best heuristic
+            score = self.heuristic(child)
+            childHeuristics.append(score)
+
+        order = []
+        for child in children:
+            order.append(childHeuristics.index(max(childHeuristics)))
 
         if node.state.get_player() == 0:
             v = float('-inf')
-            for child in children:
+            for childIndex in order:
+                child = children[childIndex]
                 ab = self.alphabeta(child, alpha, beta)
                 v = max(v, ab)
                 alpha = max(alpha, v)
@@ -104,7 +132,8 @@ class PlayerControllerMinimax(PlayerController):
                  
         else:
             v = float('inf')
-            for child in children:
+            for childIndex in order:
+                child = children[childIndex]
                 ab = self.alphabeta(child, alpha, beta)
                 v = min(v, ab)
                 beta = min(beta, v)
