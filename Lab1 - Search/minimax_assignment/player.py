@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import random, math, time
+from collections import defaultdict
 
 from fishing_game_core.game_tree import Node
 from fishing_game_core.player_utils import PlayerController
@@ -77,18 +78,21 @@ class PlayerControllerMinimax(PlayerController):
         best_move = 0
         best_score = float('-inf')
 
+        self.visited = defaultdict(self.default_value)
+
         try:
             childrenSorted = sorted(children, key=lambda child: self.heuristic(child), reverse=True)
         except:
             childrenSorted = children
 
         try:
-            for child in childrenSorted:        
+            for child in childrenSorted:
                 score = self.alphabeta(child, float('-inf'), float('inf'))        
                 if score > best_score:
                     best_score = score
                     best_move = child.move
-        except:
+        except Exception as e:
+            print(e)
             return ACTION_TO_STR[best_move]
 
         return ACTION_TO_STR[best_move]
@@ -98,11 +102,17 @@ class PlayerControllerMinimax(PlayerController):
 
         if time.time() - self.start > 0.06:
             raise TimeoutError
-            
+
+        if self.visited[self.hashState(node.state)] != None:
+            return self.visited[self.hashState(node.state)]
+
+        heuristic = self.heuristic(node)
+        self.visited[self.hashState(node.state)] = heuristic
+
         children = node.compute_and_get_children()
         
         if children == [] or node.depth == self.depth:
-            return self.heuristic(node)
+            return heuristic
 
         if node.state.get_player() == 0:
             children = sorted(children, key=lambda child: self.heuristic(child), reverse=True)
@@ -129,6 +139,20 @@ class PlayerControllerMinimax(PlayerController):
                     break
 
         return v
+    
+    def hashState(self, state):
+        hash = ""
+        hash += str(state.hook_positions[0][0])
+        hash += str(state.hook_positions[0][1])
+        hash += str(state.hook_positions[1][0])
+        hash += str(state.hook_positions[1][1])
+        hash += str(state.player_scores[0])
+        hash += str(state.player_scores[1])
+        for fish in state.fish_positions:
+            hash += str(state.fish_positions[fish][0])
+            hash += str(state.fish_positions[fish][1])
+            hash += str(state.fish_scores[fish])
+        return hash
 
     def heuristic(self, node):
         score = (node.state.player_scores[0] - node.state.player_scores[1]) * 2
@@ -152,3 +176,6 @@ class PlayerControllerMinimax(PlayerController):
             heuristic_score = max(heuristic_score, fish_scores[i] / dist) 
 
         return score + heuristic_score
+
+    def default_value(self):
+        return None
