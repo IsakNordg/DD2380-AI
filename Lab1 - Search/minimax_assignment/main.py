@@ -15,7 +15,7 @@ class Settings:
         # Player mode, either 'human' or 'ai_minimax'
         self.player_type = None
         # Frame rate of the game in frame per seconds
-        self.frames_per_second = 300
+        self.frames_per_second = 20
         # Window size is immutable and equal to self.window_scale * (800, 600)
         self.window_scale = 1.0
         # Time threshold
