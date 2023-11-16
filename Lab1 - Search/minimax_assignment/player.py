@@ -69,7 +69,7 @@ class PlayerControllerMinimax(PlayerController):
 
         # #############################
         # HYPERPARAMETERS        
-        self.depth = 5
+        self.depth = 4
         # #############################
 
         self.start = time.time()
@@ -85,29 +85,42 @@ class PlayerControllerMinimax(PlayerController):
         except:
             childrenSorted = children
 
-        try:
-            for child in childrenSorted:
-                score = self.alphabeta(child, float('-inf'), float('inf'))        
-                if score > best_score:
-                    best_score = score
-                    best_move = child.move
-        except Exception as e:
-            print(e)
-            return ACTION_TO_STR[best_move]
+        loop = True
+        while loop:
+            try:
+                for child in childrenSorted:
+                    score = self.alphabeta(child, float('-inf'), float('inf'))        
+                    if score > best_score:
+                        best_score = score
+                        best_move = childrenSorted.index(child)
+                # self.depth += 1
+                break
+                print(self.depth)
+            except TimeoutError as e:
+                print("hej", e)
+                loop = False
+            except Exception as e:
+                print("hej2", e)
+                loop = False
 
-        return ACTION_TO_STR[best_move]
+
+        return childrenSorted[best_move]
 
         
     def alphabeta(self, node, alpha, beta):
 
-        if time.time() - self.start > 0.06:
+        current = time.time()
+        diff = current - self.start
+        if diff > 0.055:
             raise TimeoutError
 
+        """
         if self.visited[self.hashState(node.state)] != None:
             return self.visited[self.hashState(node.state)]
+        """
 
         heuristic = self.heuristic(node)
-        self.visited[self.hashState(node.state)] = heuristic
+        # self.visited[self.hashState(node.state)] = heuristic
 
         children = node.compute_and_get_children()
         
