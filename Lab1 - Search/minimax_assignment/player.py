@@ -68,39 +68,31 @@ class PlayerControllerMinimax(PlayerController):
 
         # #############################
         # HYPERPARAMETERS        
-        self.depth = 0
+        self.depth = 3
         # #############################
 
-        self.start = time.time()
+        # self.start = time.time()
 
         children = initial_tree_node.compute_and_get_children()
         best_move = 0
         best_score = float('-inf')
+
+        for child in children:
+            score = self.alphabeta(child, float('-inf'), float('inf'))        
+            if score > best_score:
+                best_score = score
+                best_move = child.move
         
-        loop = True
-        while loop:
-            try:
-                for child in children:
-                    score = self.alphabeta(child, float('-inf'), float('inf'))        
-                    if score > best_score:
-                        best_score = score
-                        best_move = child.move
-                self.depth += 1
-            except TimeoutError as e:
-                print("Error!", e)
-                loop = False
-                best_move = 0
-        
-        print("best move is ", ACTION_TO_STR[best_move])
         return ACTION_TO_STR[best_move]
 
         
     def alphabeta(self, node, alpha, beta):
 
+        """
         if time.time() - self.start < 0.055:
-            print(time.time() - self.start, self.depth)
             raise TimeoutError
-
+        """
+            
         children = node.compute_and_get_children()
         
         if children == [] or node.depth == self.depth:
