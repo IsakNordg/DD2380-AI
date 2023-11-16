@@ -15,11 +15,11 @@ class Settings:
         # Player mode, either 'human' or 'ai_minimax'
         self.player_type = None
         # Frame rate of the game in frame per seconds
-        self.frames_per_second = 20
+        self.frames_per_second = 300
         # Window size is immutable and equal to self.window_scale * (800, 600)
         self.window_scale = 1.0
         # Time threshold
-        self.time_threshold = 75*1e-1
+        self.time_threshold = 75*1e-3
         # Space subdivisions
         self.space_subdivisions = 20
         # Number of frames before an action is executed

@@ -68,35 +68,47 @@ class PlayerControllerMinimax(PlayerController):
 
         # #############################
         # HYPERPARAMETERS        
-        self.depth = 3
+        self.depth = 5
         # #############################
 
-        # self.start = time.time()
+        self.start = time.time()
 
         children = initial_tree_node.compute_and_get_children()
         best_move = 0
         best_score = float('-inf')
 
-        for child in children:
-            score = self.alphabeta(child, float('-inf'), float('inf'))        
-            if score > best_score:
-                best_score = score
-                best_move = child.move
-        
+        try:
+            childrenSorted = sorted(children, key=lambda child: self.heuristic(child), reverse=True)
+        except:
+            childrenSorted = children
+
+        try:
+            for child in childrenSorted:        
+                score = self.alphabeta(child, float('-inf'), float('inf'))        
+                if score > best_score:
+                    best_score = score
+                    best_move = child.move
+        except:
+            return ACTION_TO_STR[best_move]
+
         return ACTION_TO_STR[best_move]
 
         
     def alphabeta(self, node, alpha, beta):
 
-        """
-        if time.time() - self.start < 0.055:
+        if time.time() - self.start > 0.06:
             raise TimeoutError
-        """
             
         children = node.compute_and_get_children()
         
         if children == [] or node.depth == self.depth:
             return self.heuristic(node)
+
+        if node.state.get_player() == 0:
+            children = sorted(children, key=lambda child: self.heuristic(child), reverse=True)
+        else:
+            children = sorted(children, key=lambda child: self.heuristic(child))
+        
 
         if node.state.get_player() == 0:
             v = float('-inf')
@@ -119,7 +131,7 @@ class PlayerControllerMinimax(PlayerController):
         return v
 
     def heuristic(self, node):
-        score = node.state.player_scores[0] - node.state.player_scores[1]
+        score = (node.state.player_scores[0] - node.state.player_scores[1]) * 2
 
         fish_pos = node.state.fish_positions
         hook_pos = node.state.hook_positions[0]
