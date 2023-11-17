@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import random, math, time
+from collections import defaultdict
 
 from fishing_game_core.game_tree import Node
 from fishing_game_core.player_utils import PlayerController
@@ -68,83 +69,100 @@ class PlayerControllerMinimax(PlayerController):
 
         # #############################
         # HYPERPARAMETERS        
-        self.depth = 1
+        self.depth = 7
         # #############################
 
         self.start = time.time()
+
         children = initial_tree_node.compute_and_get_children()
-        best_move = None
+        best_move = 0
         best_score = float('-inf')
 
-        childHeuristics = []
-        for child in children:
-            # See which moves gives the best heuristic
-            score = self.heuristic(child)
-            childHeuristics.append(score)
+        try:
+            childrenSorted = sorted(children, key=lambda child: self.heuristic(child), reverse=True)
+        except:
+            childrenSorted = children
 
-        order = []
-        for child in children:
-            order.append(childHeuristics.index(max(childHeuristics)))
-            
-        while True:
+        loop = True
+        depth = 7
+        visited = defaultdict(lambda: None)
+        
+        while loop:
+            visited.clear()
+            #print(loop)
+            best_score = float('-inf')
             try:
-                for childIndex in order:
-                    child = children[childIndex]
-                    score = self.alphabeta(child, float('-inf'), float('inf'))
+                for child in childrenSorted:        
+                    score = self.alphabeta(child, float('-inf'), float('inf'), depth, visited)
                     if score > best_score:
                         best_score = score
                         best_move = child.move
-                self.depth += 1
-            except Exception as e:
-                break
+                depth += 1
+                #print(depth, "time: ", time.time() - self.start)
+            except TimeoutError as e:
+                loop = False
+                return ACTION_TO_STR[best_move]
 
         return ACTION_TO_STR[best_move]
 
         
-    def alphabeta(self, node, alpha, beta):
-        children = node.compute_and_get_children()
-        
-        if time.time() - self.start > 0.055:
-            raise Exception("Timeout")
+    def alphabeta(self, node, alpha, beta, depth, visited):
 
-        if children == [] or node.depth == self.depth: 
+        if time.time() - self.start > 0.06:
+            raise TimeoutError("Time limit exceeded")
+        
+        if visited[self.hashNode(node)] != None:
+            return visited[self.hashNode(node)]        
+
+        children = node.children
+
+        if children == []:
+            children = node.compute_and_get_children()
+        
+
+        if children == [] or node.depth == depth:
             return self.heuristic(node)
+
+        if node.state.get_player() == 0:
+            children = sorted(children, key=lambda child: self.heuristic(child), reverse=True)
+        else:
+            children = sorted(children, key=lambda child: self.heuristic(child))
         
-        childHeuristics = []
-        for child in children:
-            # See which moves gives the best heuristic
-            score = self.heuristic(child)
-            childHeuristics.append(score)
-
-        order = []
-        for child in children:
-            order.append(childHeuristics.index(max(childHeuristics)))
-
 
         if node.state.get_player() == 0:
             v = float('-inf')
-            for childIndex in order:
-                child = children[childIndex]
-                ab = self.alphabeta(child, alpha, beta)
-                v = max( v, ab)
+            for child in children:
+                ab = self.alphabeta(child, alpha, beta, depth, visited)
+                v = max(v, ab)
                 alpha = max(alpha, v)
                 if alpha >= beta:
                     break
                  
         else:
             v = float('inf')
-            for childIndex in order:
-                child = children[childIndex]
-                ab = self.alphabeta(child, alpha, beta)
+            for child in children:
+                ab = self.alphabeta(child, alpha, beta, depth, visited)
                 v = min(v, ab)
                 beta = min(beta, v)
                 if alpha >= beta:
                     break
 
+        visited[self.hashNode(node)] = v
         return v
 
+    def hashNode(self, node):
+        hash = ""
+        for i in node.state.fish_positions:
+            hash += str(node.state.fish_positions[i])
+        for i in node.state.hook_positions:
+            hash += str(node.state.hook_positions[i])
+        for i in node.state.player_scores:
+            hash += str(node.state.player_scores[i])
+        
+        return hash
+
     def heuristic(self, node):
-        score = node.state.player_scores[0] - node.state.player_scores[1]
+        score = (node.state.player_scores[0] - node.state.player_scores[1]) * 2
 
         fish_pos = node.state.fish_positions
         hook_pos = node.state.hook_positions[0]
@@ -160,12 +178,8 @@ class PlayerControllerMinimax(PlayerController):
 
             if dist == 0 and fish_scores[i] > 0:
                 return float('inf') # If we can catch a fish, we should do it
-            heuristic_score = max(heuristic_score, fish_scores[i] / dist) # * math.exp(-dist))
+            elif dist == 0 and fish_scores[i] <= 0:
+                return float('-inf')
+            heuristic_score = max(heuristic_score, fish_scores[i] / dist) 
 
         return score + heuristic_score
-
-# TODO
-"""
-    Iterative deepening
-    Move ordering i alla steg?
-"""
