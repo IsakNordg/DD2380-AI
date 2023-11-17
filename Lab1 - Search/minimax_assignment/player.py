@@ -89,7 +89,6 @@ class PlayerControllerMinimax(PlayerController):
         
         while loop:
             visited.clear()
-            #print(loop)
             best_score = float('-inf')
             try:
                 for child in childrenSorted:        
@@ -98,7 +97,6 @@ class PlayerControllerMinimax(PlayerController):
                         best_score = score
                         best_move = child.move
                 depth += 1
-                #print(depth, "time: ", time.time() - self.start)
             except TimeoutError as e:
                 loop = False
                 return ACTION_TO_STR[best_move]
