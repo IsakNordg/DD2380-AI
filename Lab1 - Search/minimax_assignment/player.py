@@ -69,7 +69,7 @@ class PlayerControllerMinimax(PlayerController):
 
         # #############################
         # HYPERPARAMETERS        
-        self.depth = 4
+        self.depth = 7
         # #############################
 
         self.start = time.time()
@@ -78,54 +78,50 @@ class PlayerControllerMinimax(PlayerController):
         best_move = 0
         best_score = float('-inf')
 
-        self.visited = defaultdict(self.default_value)
-
         try:
             childrenSorted = sorted(children, key=lambda child: self.heuristic(child), reverse=True)
         except:
             childrenSorted = children
 
         loop = True
+        depth = 7
+        visited = defaultdict(lambda: None)
+        
         while loop:
+            visited.clear()
+            #print(loop)
+            best_score = float('-inf')
             try:
-                for child in childrenSorted:
-                    score = self.alphabeta(child, float('-inf'), float('inf'))        
+                for child in childrenSorted:        
+                    score = self.alphabeta(child, float('-inf'), float('inf'), depth, visited)
                     if score > best_score:
                         best_score = score
-                        best_move = childrenSorted.index(child)
-                # self.depth += 1
-                break
-                print(self.depth)
+                        best_move = child.move
+                depth += 1
+                #print(depth, "time: ", time.time() - self.start)
             except TimeoutError as e:
-                print("hej", e)
                 loop = False
-            except Exception as e:
-                print("hej2", e)
-                loop = False
+                return ACTION_TO_STR[best_move]
 
-
-        return childrenSorted[best_move]
+        return ACTION_TO_STR[best_move]
 
         
-    def alphabeta(self, node, alpha, beta):
+    def alphabeta(self, node, alpha, beta, depth, visited):
 
-        current = time.time()
-        diff = current - self.start
-        if diff > 0.055:
-            raise TimeoutError
-
-        """
-        if self.visited[self.hashState(node.state)] != None:
-            return self.visited[self.hashState(node.state)]
-        """
-
-        heuristic = self.heuristic(node)
-        # self.visited[self.hashState(node.state)] = heuristic
-
-        children = node.compute_and_get_children()
+        if time.time() - self.start > 0.06:
+            raise TimeoutError("Time limit exceeded")
         
-        if children == [] or node.depth == self.depth:
-            return heuristic
+        if visited[self.hashNode(node)] != None:
+            return visited[self.hashNode(node)]        
+
+        children = node.children
+
+        if children == []:
+            children = node.compute_and_get_children()
+        
+
+        if children == [] or node.depth == depth:
+            return self.heuristic(node)
 
         if node.state.get_player() == 0:
             children = sorted(children, key=lambda child: self.heuristic(child), reverse=True)
@@ -136,7 +132,7 @@ class PlayerControllerMinimax(PlayerController):
         if node.state.get_player() == 0:
             v = float('-inf')
             for child in children:
-                ab = self.alphabeta(child, alpha, beta)
+                ab = self.alphabeta(child, alpha, beta, depth, visited)
                 v = max(v, ab)
                 alpha = max(alpha, v)
                 if alpha >= beta:
@@ -145,26 +141,24 @@ class PlayerControllerMinimax(PlayerController):
         else:
             v = float('inf')
             for child in children:
-                ab = self.alphabeta(child, alpha, beta)
+                ab = self.alphabeta(child, alpha, beta, depth, visited)
                 v = min(v, ab)
                 beta = min(beta, v)
                 if alpha >= beta:
                     break
 
+        visited[self.hashNode(node)] = v
         return v
-    
-    def hashState(self, state):
+
+    def hashNode(self, node):
         hash = ""
-        hash += str(state.hook_positions[0][0])
-        hash += str(state.hook_positions[0][1])
-        hash += str(state.hook_positions[1][0])
-        hash += str(state.hook_positions[1][1])
-        hash += str(state.player_scores[0])
-        hash += str(state.player_scores[1])
-        for fish in state.fish_positions:
-            hash += str(state.fish_positions[fish][0])
-            hash += str(state.fish_positions[fish][1])
-            hash += str(state.fish_scores[fish])
+        for i in node.state.fish_positions:
+            hash += str(node.state.fish_positions[i])
+        for i in node.state.hook_positions:
+            hash += str(node.state.hook_positions[i])
+        for i in node.state.player_scores:
+            hash += str(node.state.player_scores[i])
+        
         return hash
 
     def heuristic(self, node):
@@ -189,6 +183,3 @@ class PlayerControllerMinimax(PlayerController):
             heuristic_score = max(heuristic_score, fish_scores[i] / dist) 
 
         return score + heuristic_score
-
-    def default_value(self):
-        return None
