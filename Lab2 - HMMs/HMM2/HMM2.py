@@ -13,24 +13,28 @@ class HMM:
         A_T = self.transpose(self.A)
         B_T = self.transpose(self.B)
 
+        # Initialize first column of delta
         delta.append([])
         delta_0 = self.elementWiseProduct(self.pi, B_T[self.sequence[0]])
         for i in range(len(delta_0)):
             tmp = -math.inf if delta_0[i] == 0.0 else math.log(delta_0[i])
             delta[0].append(tmp)
 
+        # Iterate through the rest of the columns (time steps)
         for i in range(1, self.M):
             delta.append([])
             backptr.append([])
+            # Iterate through the states that need to be calculated
             for j in range(len(self.A)):
                 tmp = []
+                # Iterate through the states in the previous column to find the max probability
                 for k in range(len(self.A)):                    
                     
-                    a = delta[i-1][k]
-                    b = -math.inf if A_T[j][k] == 0.0 else math.log(A_T[j][k])
-                    c = -math.inf if B_T[self.sequence[i]][j] == 0.0 else math.log(B_T[self.sequence[i]][j])
+                    prevVal = delta[i-1][k] # Previous delta value
+                    transVal = -math.inf if A_T[j][k] == 0.0 else math.log(A_T[j][k])
+                    obsVal = -math.inf if B_T[self.sequence[i]][j] == 0.0 else math.log(B_T[self.sequence[i]][j])
 
-                    tmp.append(a + b + c)
+                    tmp.append(prevVal + transVal + obsVal)
 
                 delta[i].append(max(tmp))
                 backptr[i-1].append(tmp.index(max(tmp)))
@@ -39,11 +43,14 @@ class HMM:
 
     def backwardPass(self):
         mostProbableSequence = []
+
+        # Find the most probable state in the last column
         mostProbableSequence.append(self.delta[self.M-1].index(max(self.delta[self.M-1])))
+        # Find the most probable sequence by backtracking the backpointer
         for i in range(self.M-2, -1, -1):
             mostProbableSequence.append(self.backptr[i][mostProbableSequence[self.M-2-i]])
 
-        return mostProbableSequence[::-1]
+        return mostProbableSequence[::-1]   # Reverse the list
 
 
     def elementWiseProduct(self, X, Y):
@@ -111,12 +118,10 @@ class HMM:
                 formattedMatrix[i].append(float(matrix[i * columns + j]))
         
         return formattedMatrix
-            
-            
+    
 
 def main():
     hmm = HMM()
-
 
 
 if __name__ == "__main__":
