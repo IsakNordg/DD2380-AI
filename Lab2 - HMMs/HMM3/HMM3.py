@@ -1,3 +1,5 @@
+import math
+
 class Baum_Welch():
  
     def __init__(self):
@@ -86,10 +88,14 @@ class Baum_Welch():
             for i in range(len(self.A)): #current states
                 sum = 0
                 for j in range(len(self.A)): #states after
-                    sum += log(beta[1][j])+ log(self.B[self.sequence[t]][j]) + log(self.A[i][j]) #Se över ordningen på indexet
+
+                    nextVal = beta[1][j] # Next beta value
+                    transVal = -math.inf if self.A[i][j] == 0.0 else math.log(self.A[i][j])
+                    obsVal = -math.inf if self.B[j][self.sequence[i]] == 0.0 else math.log(self.B[j][self.sequence[i]])
+                    sum += nextVal + transVal + obsVal
                 beta[0].append(sum)
 
-
+            print(t)
 
     
 test = Baum_Welch()
