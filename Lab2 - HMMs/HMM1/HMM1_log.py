@@ -1,3 +1,4 @@
+import math
 
 class HMM:
     def __init__(self):
@@ -11,19 +12,18 @@ class HMM:
         B_T = self.transpose(self.B)
         for i in range(1, self.M):
             tmp = self.multiplyMatrixWithVector(A_T, alpha[i - 1])
-            print(tmp)
+            print("mult: ", tmp)
             tmp = self.elementWiseProduct(tmp, B_T[self.sequence[i]])
-            print(tmp)
-            alpha.append(self.elementWiseProduct(self.multiplyMatrixWithVector(A_T, alpha[i - 1]), B_T[self.sequence[i]]))
+            print("prod:", tmp)
+            alpha.append(tmp)
 
         print(alpha)
-        return sum(alpha[self.M-1])
 
 
     def elementWiseProduct(self, X, Y):
         result = []
         for i in range(len(X)):
-            result.append(X[i] * Y[i])
+            result.append(X[i] + Y[i])
         
         return result
 
@@ -35,7 +35,7 @@ class HMM:
         for i in range(len(M)):
             result.append(0)
             for j in range(len(M[0])):
-                result[i] += M[i][j] * v[j]
+                result[i] += M[i][j] + v[j] #HÄR ÄR DET KNAS
         
         return result
 
@@ -47,7 +47,7 @@ class HMM:
             for j in range(len(Y[0])):
                 # iterate through rows of Y
                 for k in range(len(Y)):
-                    result[i][j] += X[i][k] * Y[k][j]
+                    result[i][j] += X[i][k] + Y[k][j]
 
         return result
 
@@ -82,19 +82,14 @@ class HMM:
         for i in range(rows):
             formattedMatrix.append([])
             for j in range(columns):
-                formattedMatrix[i].append(float(matrix[i * columns + j]))
+                val = -math.inf if float(matrix[i * columns + j]) == 0.0 else math.log(float(matrix[i * columns + j]))
+                formattedMatrix[i].append(val)
         
         return formattedMatrix
-                
-    def printOutput(self, output):
-        print("1 " + str(len(output)) + " ", end="")
-        for i in range(len(output)):
-            print(str(round(output[i], 2)) + " ", end="")
             
 
 def main():
     hmm = HMM()
-
 
 
 if __name__ == "__main__":
