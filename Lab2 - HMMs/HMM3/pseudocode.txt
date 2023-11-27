@@ -1,0 +1,122 @@
+The α-pass
+// compute α0(i)
+
+c0 = 0
+for i = 0 to N − 1
+    α0(i) = πibi(O0)
+    c0 = c0 + α0(i)
+next i
+
+// scale the α0(i)
+c0 = 1/c0
+for i = 0 to N − 1
+    α0(i) = c0α0(i)
+next i
+
+// compute αt(i)
+for t = 1 to T − 1
+    ct = 0
+    for i = 0 to N − 1
+        αt(i) = 0
+        for j = 0 to N − 1
+            αt(i) = αt(i) + αt−1(j)aji
+        next j
+        αt(i) = αt(i)bi(Ot)
+        ct = ct + αt(i)
+    next i
+
+// scale αt(i)
+    ct = 1/ct
+    for i = 0 to N − 1
+        αt(i) = ctαt(i)
+    next i
+next t
+
+3. The β-pass
+// Let βT −1(i) = 1, scaled by cT −1
+
+for i = 0 to N − 1
+    βT −1(i) = cT −1
+next i
+// β-pass
+for t = T − 2 to 0 by − 1
+    for i = 0 to N − 1
+        βt(i) = 0
+        for j = 0 to N − 1
+            βt(i) = βt(i) + aij bj (Ot+1)βt+1(j)
+        next j
+        // scale βt(i) with same scale factor as αt(i)
+        βt(i) = ctβt(i)
+    next i
+next t
+
+4. Compute γt(i, j) and γt(i)
+// No need to normalize γt(i, j) since using scaled α and β
+
+for t = 0 to T − 2
+    for i = 0 to N − 1
+        γt(i) = 0
+        for j = 0 to N − 1
+            γt(i, j) = (αt(i)aij bj (Ot+1)βt+1(j))
+            γt(i) = γt(i) + γt(i, j)
+        next j
+    next i
+next t
+
+// Special case for γT −1(i) (as above, no need to normalize)
+for i = 0 to N − 1
+    γT −1(i) = αT −1(i)
+next i
+
+5. Re-estimate A, B and π
+// re-estimate π
+
+for i = 0 to N − 1
+    πi = γ0(i)
+next i
+// re-estimate A
+for i = 0 to N − 1
+    denom = 0
+    for t = 0 to T − 2
+        denom = denom + γt(i)
+    next t
+    for j = 0 to N − 1
+        numer = 0
+        for t = 0 to T − 2
+            numer = numer + γt(i, j)
+        next t
+        aij = numer/denom
+    next j
+next i
+// re-estimate B
+for i = 0 to N − 1
+    denom = 0
+    for t = 0 to T − 1
+        denom = denom + γt(i)
+    next t
+    for j = 0 to M − 1
+        numer = 0
+        for t = 0 to T − 1
+            if(Ot == j) then
+                numer = numer + γt(i)
+            end if
+        next t
+        bi(j) = numer/denom
+    next j
+next i
+
+6. Compute log[P (O | λ)]
+logProb = 0
+for i = 0 to T − 1
+    logProb = logProb + log(ci)
+next i
+logProb = −logProb
+
+7. To iterate or not to iterate, that is the question. . .
+iters = iters + 1
+if (iters < maxIters and logProb > oldLogProb) then
+    oldLogProb = logProb
+    goto 2
+else
+    output λ = (π, A, B)
+end if
