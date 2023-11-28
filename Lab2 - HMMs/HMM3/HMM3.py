@@ -4,35 +4,51 @@ class Baum_Welch():
  
     def __init__(self):
         self.readInput()
-        self.maxIters = 300
+        self.maxIters = 100
         self.iters = 0
         self.oldLogProb = float("-inf")
 
         self.iterate()
 
     def iterate(self):
-        self.alpha = self.alphaPass()
-        self.beta = self.betaPass()
-        self.gamma = self.gammaPass()
-        self.reestimate()
-        self.logprob = self.computeLogProb()
-        self.iters += 1
-        if self.iters < self.maxIters and self.logprob > self.oldLogProb:
-            self.oldLogProb = self.logprob
-            self.iterate()
-        else:
-            self.printOutput()
+        while True:
+            self.alpha = self.alphaPass()
+            self.beta = self.betaPass()
+            self.gamma = self.gammaPass()
+            self.reestimate()
+            self.logprob = self.computeLogProb()
+            self.iters += 1
+            if self.iters < self.maxIters and self.logprob > self.oldLogProb:
+                self.oldLogProb = self.logprob
+            else:
+                break
+        self.printOutput()
+        
     
     def printOutput(self):
-        print("          " + str(len(self.A)), len(self.A), end="")
+        print(len(self.A), len(self.A), end="")
         for i in range(len(self.A)):
             for j in range(len(self.A[0])):
-                print(" " + str(round(self.A[i][j], 6)), end="")
+                """                
+                val = float(round(self.A[i][j], 6))
+                if "e" in str(val):
+                    print(" " + "%.1f" % val, end="")
+                else:
+                    print(" " + str(float(round(self.A[i][j], 6))), end="")
+                """
+                print(" " + str(float(round(self.A[i][j], 6))), end="")
         print()
         print(len(self.B), len(self.B[0]), end="")
         for i in range(len(self.B)):
             for j in range(len(self.B[0])):
-                print(" " + str(round(self.B[i][j], 6)), end="")
+                val = float(round(self.B[i][j], 6))
+                """
+                if "e" in str(val):
+                    print(" " + "%.1f" % val, end="")
+                else:
+                    print(" " + str(float(round(self.B[i][j], 6))), end="")
+                """
+                print(" " + str(float(round(self.B[i][j], 6))), end="")
         print()
 
 
@@ -55,7 +71,7 @@ class Baum_Welch():
             for i in range(len(self.A)):
                 alpha[t].append(0)
                 for j in range(len(self.A)):
-                    alpha[t][i] += alpha[t-1][j] * self.A[j][i] # transposed
+                    alpha[t][i] += alpha[t-1][j] * self.A[j][i]
                 alpha[t][i] *= self.B[i][self.sequence[t]]
                 c[t] += alpha[t][i]
 
@@ -70,7 +86,7 @@ class Baum_Welch():
     def betaPass(self):
         beta = [[]]
         for i in range(len(self.A)):
-            beta[0].append(1)
+            beta[0].append(self.c[self.M-1])
 
         for t in range(self.M-2, -1, -1):
             beta.insert(0, [])
@@ -116,7 +132,10 @@ class Baum_Welch():
                 numer = 0
                 for t in range(self.M-1):
                     numer += self.digamma[t][i][j]
-                self.A[i][j] = numer / denom
+                if denom == 0:
+                    self.A[i][j] = 0
+                else:
+                    self.A[i][j] = numer / denom
 
         # B
         for i in range(len(self.A)):
