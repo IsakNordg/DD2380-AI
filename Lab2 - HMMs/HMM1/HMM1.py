@@ -10,10 +10,6 @@ class HMM:
         A_T = self.transpose(self.A)
         B_T = self.transpose(self.B)
         for i in range(1, self.M):
-            tmp = self.multiplyMatrixWithVector(A_T, alpha[i - 1])
-            print(tmp)
-            tmp = self.elementWiseProduct(tmp, B_T[self.sequence[i]])
-            print(tmp)
             alpha.append(self.elementWiseProduct(self.multiplyMatrixWithVector(A_T, alpha[i - 1]), B_T[self.sequence[i]]))
 
         print(alpha)
