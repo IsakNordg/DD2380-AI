@@ -4,7 +4,7 @@ class Baum_Welch():
  
     def __init__(self):
         self.seqFile = "hmm_c_N10000.in"
-        self.maxIters = 500
+        self.maxIters = 300
         self.M = 10000
 
         self.readInput()
