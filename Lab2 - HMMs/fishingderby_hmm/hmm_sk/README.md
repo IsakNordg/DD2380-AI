@@ -42,6 +42,8 @@ And then close and open a new terminal.
 ```
 $ mkvirtualenv -p C:\Users\<YourWindowsUser>\AppData\Local\Programs\Python\Python36\bin\python.exe fishingderby
 (fishingderby) $ pip install -r requirements_win.txt
+
+mkvirtualenv -p C:\Users\isakn\miniconda3\envs\AILab2\python.exe fishingderby
 ```
 
 To run the GUI, in the skeleton's directory, run in the terminal:

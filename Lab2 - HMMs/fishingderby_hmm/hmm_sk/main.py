@@ -4,7 +4,7 @@ import os
 import signal
 import sys
 
-import yaml
+#import yaml
 from kivy.config import Config
 
 from shared import SettingLoader
@@ -30,9 +30,14 @@ class Settings:
         :param dictionary:
         :return:
         """
+        """
         self.frames_per_second = dictionary.get("frames_per_second", 20)
         self.window_scale = dictionary.get("window_scale", 1.0)
         self.time_threshold = dictionary.get("time_threshold", 5e-1)
+        """
+        self.frames_per_second = 20
+        self.window_scale = 1.0
+        self.time_threshold = 5e-1
 
 
 class Application(SettingLoader):
@@ -115,11 +120,14 @@ class Application(SettingLoader):
 
 
 if __name__ == '__main__':
+    
     # Load the settings from the yaml file
     settings = Settings()
-    settings_dictionary = yaml.safe_load(open('settings.yml', 'r'))
-    settings_dictionary['time_threshold'] = constants.STEP_TIME_THRESHOLD
+    #settings_dictionary = yaml.safe_load(open('settings.yml', 'r'))
+    #settings_dictionary['time_threshold'] = constants.STEP_TIME_THRESHOLD
+    settings_dictionary = {}
     settings.load_from_dict(settings_dictionary)
+    
 
     # Set window dimensions
     Config.set('graphics', 'resizable', False)

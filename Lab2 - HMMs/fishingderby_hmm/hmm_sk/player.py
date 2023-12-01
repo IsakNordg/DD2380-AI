@@ -23,10 +23,26 @@ class PlayerControllerHMM(PlayerControllerHMMAbstract):
         :return: None or a tuple (fish_id, fish_type)
         """
 
-        # This code would make a random guess on each step:
-        # return (step % N_FISH, random.randint(0, N_SPECIES - 1))
+        if self.step < 110:
+            self.updateModel()
+        else:
+            self.makeGuess()
 
-        return None
+        # This code would make a random guess on each step:
+        return (step % N_FISH, random.randint(0, N_SPECIES - 1))
+
+    def updateModel(self):
+        """
+        This method updates the model with the new observations.
+        """
+        pass
+
+    def makeGuess(self):
+        """
+        This method makes a guess.
+        """
+        pass
+
 
     def reveal(self, correct, fish_id, true_type):
         """
