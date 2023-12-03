@@ -5,13 +5,38 @@ from constants import *
 import random
 
 
+def generate_rand(size = 1):
+    prel = [1/size + random.rand/100 for i in range(size)]
+    normalized = []
+    for i in range(size):
+        normalized.append(prel[i]/sum(prel))
+    return normalized
+
+class Model():
+    def _init_(self, emissions): #Kan vara heeelt fel
+        self.A = generate_rand()
+        self.B = generate_rand(emissions)
+        self.pi = generate_rand
+
+    def update(self):
+        """to be written"""
+        pass
+
+
 class PlayerControllerHMM(PlayerControllerHMMAbstract):
     def init_parameters(self):
         """
         In this function you should initialize the parameters you will need,
         such as the initialization of models, or fishes, among others.
         """
-        pass
+        self.fish_models = []
+        for i in range(N_SPECIES):
+            self.fish_models.append(Model(N_EMISSIONS))
+
+        self.fish_list = []
+        for i in range(N_FISH):
+            self.fish_list.append([])
+
 
     def guess(self, step, observations):
         """
@@ -22,9 +47,12 @@ class PlayerControllerHMM(PlayerControllerHMMAbstract):
         :param observations: a list of N_FISH observations, encoded as integers
         :return: None or a tuple (fish_id, fish_type)
         """
+        for i in range(N_FISH):
+            self.fish_list.append(observations[i])
 
         if self.step < 110:
-            self.updateModel()
+            #self.updateModel()
+            return None #As we only want to train the model once we have as many observations as possible
         else:
             self.makeGuess()
 
