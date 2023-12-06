@@ -96,6 +96,8 @@ The following command will make a new virtual environment for your project. Repl
 the path to your python.exe file. Could be something like C:\Users\<Your Windows User>\AppData\Local\Programs\Python\Python36\python.exe
 ```
  >mkvirtualenv -p {path to Python Interpreter} fishingderby
+ mkvirtualenv -p C:\Users\isakn\miniconda3\envs\RL fishingderby
+
 ```
 The next command will install the requirements in the virtual environment. Run it in the same terminal as above. 
 ```
