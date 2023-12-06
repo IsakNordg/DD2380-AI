@@ -28,23 +28,20 @@ class Baum_Welch():
         
     
     def printOutput(self):
-        print("A:")
+        print(len(self.A), len(self.A), end="")
         for i in range(len(self.A)):
             for j in range(len(self.A[0])):
-                print(round(self.A[i][j], 2), end="\t")
-            print()
+                print(" " + str(float(round(self.A[i][j], 6))), end="")
         print()
-        
-        print("B:")
+        print(len(self.B), len(self.B[0]), end="")
         for i in range(len(self.B)):
             for j in range(len(self.B[0])):
-                print(round(self.B[i][j], 2), end="\t")
-            print()
+                val = float(round(self.B[i][j], 6))
+                print(" " + str(float(round(self.B[i][j], 6))), end="")
         print()
-
-        print("pi:")
         for i in range(len(self.pi)):
-            print(round(self.pi[i], 2), end="\t")
+            print(str(float(round(self.pi[i], 6))), end=" ")
+        print()
 
     def alphaPass(self):
         alpha = [[]]
@@ -156,14 +153,9 @@ class Baum_Welch():
             
 # ---------------------------------------------------------------
     def readInput(self):
-        """
-        self.A = [[0.1, 0.2, 0.7], [0.3, 0.4, 0.3], [0.5, 0.2, 0.3]]
-        self.B = [[0.1, 0.2, 0.3, 0.4], [0.1, 0.1, 0.1, 0.7], [0.4, 0.3, 0.2, 0.1]]
-        self.pi = [0.0, 0.0, 1]
-        """
-        self.A = [[0.34, 0.33, 0.33], [0.33, 0.34, 0.33], [0.33, 0.33, 0.34]]
-        self.B = [[0.24, 0.26, 0.24, 0.26], [0.26, 0.24, 0.26, 0.24], [0.26, 0.24, 0.26, 0.24]]
-        self.pi = [0.33, 0.34, 0.33]
+        self.A = [[1/3, 1/3, 1/3], [1/3, 1/3, 1/3], [1/3, 1/3, 1/3]]
+        self.B = [[0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]]
+        self.pi = [1/3, 1/3, 1/3]
         with open(self.seqFile) as f:
             self.sequence = f.readline()
         self.sequence = self.formatSequence(self.sequence)
