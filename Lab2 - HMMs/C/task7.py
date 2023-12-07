@@ -3,8 +3,9 @@ import math
 class Baum_Welch():
  
     def __init__(self):
-        self.seqFile = "hmm_c_N10000.in"
-        self.maxIters = 300
+        self.seqFile = "C/hmm_c_N10000.in"
+        self.maxIters = 100000
+        self.M = 1000
 
         self.readInput()
         self.iterate()
@@ -23,6 +24,9 @@ class Baum_Welch():
                 self.oldLogProb = self.logprob
             else:
                 break
+
+            if self.iters % 10 == 0:
+                print("Iteration: " + str(self.iters))
         self.printOutput()
         
     
@@ -155,7 +159,7 @@ class Baum_Welch():
 
         self.A = [[0.54, 0.26, 0.2], [0.19, 0.53, 0.28], [0.22, 0.18, 0.6]]
         self.B = [[0.5, 0.2, 0.11, 0.19], [0.22, 0.28, 0.23, 0.27], [0.19, 0.21, 0.15, 0.45]]
-        self.pi = [0.2, 0.3, 0.5]
+        self.pi = [0.3, 0.2, 0.5]
         with open(self.seqFile) as f:
             self.sequence = f.readline()
         self.sequence = self.formatSequence(self.sequence)
@@ -177,7 +181,7 @@ class Baum_Welch():
     def formatSequence(self, sequence):
         sequence = sequence.split(" ")
         #self.M = int(sequence[0])
-        self.M = 1000
+        
         sequence = sequence[1:-1]
         formattedSequence = []
         for i in range(self.M):

@@ -8,8 +8,8 @@ init_pos_diver: [1, 8]
 frames_per_second: 10000
 
 ## Player type or nature. Possible values: "ai_rl" or "random". Default: "ai_rl"
-player_type: "random"
-# player_type: "ai_rl"
+# player_type: "random"
+player_type: "ai_rl"
 
 ## Q learning learning rate
 alpha: 0.1
@@ -18,7 +18,7 @@ alpha: 0.1
 gamma: 0.1
 
 # Disables the graphical engine of the simulator (true by default)
-headless: false
+headless: true
 
 ## Epsilon initial
 epsilon_initial: 1
@@ -53,7 +53,7 @@ stoch: false
 episode_len: 100
 
 # Max episodes
-episode_max: 1000
+episode_max: 100
 
 # Visualize exploration (slow, just for debugging)
 visualize_exploration: true
