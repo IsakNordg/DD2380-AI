@@ -362,6 +362,7 @@ class ScheduleLinear(object):
         # ADD YOUR CODE SNIPPET BETWEEN EX 4.2
         # Return the annealed linear value
 
-
-        return self.initial_p
+        """Go from 1 to 0.2 tith schedule_timesteps - returns epsilon for current timestep"""
+        e_t = self.initial_p - t*(self.initial_p - self.final_p)/self.schedule_timesteps
+        return e_t 
         # ADD YOUR CODE SNIPPET BETWEEN EX 4.2
