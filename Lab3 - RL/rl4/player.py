@@ -252,7 +252,6 @@ class PlayerControllerRL(PlayerController, FishesModelling):
         return Q
 
     def get_policy(self, Q):
-        print(Q)
         max_actions = np.nanargmax(Q, axis=1)
         policy = {}
         list_actions = list(self.actions.keys())
