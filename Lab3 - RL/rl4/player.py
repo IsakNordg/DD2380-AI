@@ -93,7 +93,7 @@ def epsilon_greedy(Q,
                    epsilon_initial=1,
                    epsilon_final=0.2,
                    anneal_timesteps=10000,
-                   eps_type="constant"):
+                   eps_type="linear"):
 
     if eps_type == 'constant':
         epsilon = epsilon_final
@@ -236,7 +236,7 @@ class PlayerControllerRL(PlayerController, FishesModelling):
 
                 # ADD YOUR CODE SNIPPET BETWEEN EX. 2.2
                 # Implement the Bellman Update equation to update Q
-                Q[s_current][action] = Q[s_current][action] + lr*(R + discount*np.max(Q[s_next]) - Q[s_current][action])
+                Q[s_current][action] = Q[s_current][action] + lr*(R + discount*np.nanmax(Q[s_next]) - Q[s_current][action])
                 # ADD YOUR CODE SNIPPET BETWEEN EX. 2.2
 
                 s_current = s_next
