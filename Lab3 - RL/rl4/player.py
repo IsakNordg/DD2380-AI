@@ -103,10 +103,8 @@ def epsilon_greedy(Q,
         # It is recommended you use the np.random module
         if np.random.random() < epsilon:
             action = np.random.choice(all_actions)
-            print(isinstance(action, str))
         else:
-            action = np.argmax(Q[state])
-            print("hopp")
+            action = np.nanargmax(Q[state])
 
         # ADD YOUR CODE SNIPPET BETWEEN EX 4.1
 
@@ -122,14 +120,12 @@ def epsilon_greedy(Q,
         if np.random.random() < epsilon:
             action = np.random.choice(all_actions)
         else:
-            action = np.argmax(Q[state])
+            action = np.nanargmax(Q[state])
 
         # ADD YOUR CODE SNIPPET BETWEENEX  4.2
 
     else:
         raise "Epsilon greedy type unknown"
-    
-    print(action)
 
     return action
 
@@ -222,7 +218,6 @@ class PlayerControllerRL(PlayerController, FishesModelling):
                 else:
                     action_str = action
                     action = self.action_list.index(action)
-                print("här: " + str(action_str))
                 msg = {"action": action_str, "exploration": True}
                 self.sender(msg)
 
@@ -245,7 +240,7 @@ class PlayerControllerRL(PlayerController, FishesModelling):
 
             # ADD YOUR CODE SNIPPET BETWEEN EX. 2.3
             # Compute the absolute value of the mean between the Q and Q-old
-            diff = abs(Q - Q_old).mean()
+            diff = np.absolute(np.nanmean(Q - Q_old))
             # ADD YOUR CODE SNIPPET BETWEEN EX. 2.3
             Q_old[:] = Q
             print(
