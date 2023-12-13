@@ -93,7 +93,7 @@ def epsilon_greedy(Q,
                    epsilon_initial=1,
                    epsilon_final=0.2,
                    anneal_timesteps=10000,
-                   eps_type="constant"):
+                   eps_type="linear"):
 
     if eps_type == 'constant':
         epsilon = epsilon_final
@@ -103,8 +103,10 @@ def epsilon_greedy(Q,
         # It is recommended you use the np.random module
         if np.random.random() < epsilon:
             action = np.random.choice(all_actions)
+            print(isinstance(action, str))
         else:
             action = np.argmax(Q[state])
+            print("hopp")
 
         # ADD YOUR CODE SNIPPET BETWEEN EX 4.1
 
@@ -126,6 +128,8 @@ def epsilon_greedy(Q,
 
     else:
         raise "Epsilon greedy type unknown"
+    
+    print(action)
 
     return action
 
@@ -213,7 +217,12 @@ class PlayerControllerRL(PlayerController, FishesModelling):
                 # ADD YOUR CODE SNIPPET BETWEEN EX 5
 
                 # compute reward
-                action_str = self.action_list[action]
+                if not isinstance(action, str):
+                    action_str = self.action_list[action]
+                else:
+                    action_str = action
+                    action = self.action_list.index(action)
+                print("här: " + str(action_str))
                 msg = {"action": action_str, "exploration": True}
                 self.sender(msg)
 
@@ -227,7 +236,7 @@ class PlayerControllerRL(PlayerController, FishesModelling):
 
                 # ADD YOUR CODE SNIPPET BETWEEN EX. 2.2
                 # Implement the Bellman Update equation to update Q
-                Q[s_current][action] = Q[s_current][action] + lr*(R + discount*np.max(Q[s_next]) - Q[s_current][action])
+                Q[s_current][action] = Q[s_current][action] + lr*(R + discount*np.nanmax(Q[s_next]) - Q[s_current][action])
                 # ADD YOUR CODE SNIPPET BETWEEN EX. 2.2
 
                 s_current = s_next
@@ -248,6 +257,7 @@ class PlayerControllerRL(PlayerController, FishesModelling):
         return Q
 
     def get_policy(self, Q):
+        print(Q)
         max_actions = np.nanargmax(Q, axis=1)
         policy = {}
         list_actions = list(self.actions.keys())
