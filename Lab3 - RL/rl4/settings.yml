@@ -12,7 +12,7 @@ frames_per_second: 10000
 player_type: "ai_rl"
 
 ## Q learning learning rate
-alpha: 0.2
+alpha: 0.1
 
 ## Q learning discount rate
 gamma: 0.8
