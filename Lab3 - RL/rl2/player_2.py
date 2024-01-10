@@ -194,7 +194,7 @@ class PlayerControllerRL(PlayerController, FishesModelling):
 
                 # ADD YOUR CODE SNIPPET BETWEEN EX 2.1 and 2.2
                 # Chose an action from all possible actions
-                action = np.argmax(Q[s_current])
+                action = np.nanargmax(Q[s_current])
                 # ADD YOUR CODE SNIPPET BETWEEN EX 2.1 and 2.2
 
                 # ADD YOUR CODE SNIPPET BETWEEN EX 5
@@ -216,7 +216,7 @@ class PlayerControllerRL(PlayerController, FishesModelling):
 
                 # ADD YOUR CODE SNIPPET BETWEEN EX. 2.2
                 # Implement the Bellman Update equation to update Q
-                Q[s_current][action] = Q[s_current][action] + lr*(R + discount*np.max(Q[s_next]) - Q[s_current][action])
+                Q[s_current][action] = Q[s_current][action] + lr*(R + discount*np.nanmax(Q[s_next]) - Q[s_current][action])
                 # ADD YOUR CODE SNIPPET BETWEEN EX. 2.2
 
                 s_current = s_next
@@ -225,7 +225,8 @@ class PlayerControllerRL(PlayerController, FishesModelling):
 
             # ADD YOUR CODE SNIPPET BETWEEN EX. 2.3
             # Compute the absolute value of the mean between the Q and Q-old
-            diff = abs(Q - Q_old).mean()
+            # diff = abs(Q - Q_old).nanmean()
+            diff = np.nanmean(np.abs(Q - Q_old))
             # ADD YOUR CODE SNIPPET BETWEEN EX. 2.3
             Q_old[:] = Q
             print(
